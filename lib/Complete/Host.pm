@@ -20,6 +20,11 @@ our %SPEC;
 $SPEC{':package'} = {
     v => 1.1,
     summary => 'Completion routines related to hostnames',
+    description => <<'_',
+
+This includes grabbing hostnames from /etc/hosts, ~/ssh/.known_hosts, etc.
+
+_
 };
 
 1;
