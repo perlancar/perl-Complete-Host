@@ -62,6 +62,10 @@ _
             default => 1,
         },
     },
+    result_naked => 1,
+    result => {
+        schema => 'array',
+    },
 };
 sub complete_known_host {
     my %args = @_;
