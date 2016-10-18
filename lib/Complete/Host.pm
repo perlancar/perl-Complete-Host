@@ -78,7 +78,7 @@ sub complete_known_host {
     # from /etc/hosts
     {
         last unless $args{include_hosts} // 1;
-        $log->tracef("[comphost] Checking /etc/hosts"];
+        $log->tracef("[comphost] Checking /etc/hosts");
         require Parse::Hosts;
         my $res = Parse::Hosts::parse_hosts();
         last if $res->[0] != 200;
@@ -98,7 +98,7 @@ sub complete_known_host {
   IFCONFIG:
     {
         last unless $inc_ip;
-        $log->tracef("[comphost] Checking ifconfig output"];
+        $log->tracef("[comphost] Checking ifconfig output");
         require IPC::System::Options;
         for my $prog ("/sbin/ifconfig") {
             next unless -x $prog;
@@ -127,7 +127,7 @@ sub complete_known_host {
             if $ENV{HOME};
         for my $file (@files) {
             next unless -f $file;
-            $log->tracef("[comphost] Checking %s", $file];
+            $log->tracef("[comphost] Checking %s", $file);
             open my($fh), "<", $file or next;
             while (my $line = <$fh>) {
                 next unless $line =~ /\S/;
