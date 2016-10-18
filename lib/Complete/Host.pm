@@ -16,6 +16,8 @@ our @EXPORT_OK = qw(
                        complete_known_host
                );
 
+our $COMPLETE_HOST_TRACE = $ENV{COMPLETE_HOST_TRACE} // 0;
+
 our %SPEC;
 
 $SPEC{':package'} = {
@@ -78,17 +80,17 @@ sub complete_known_host {
     # from /etc/hosts
     {
         last unless $args{include_hosts} // 1;
-        $log->tracef("[comphost] Checking /etc/hosts");
+        $log->tracef("[comphost] Checking /etc/hosts") if $COMPLETE_HOST_TRACE;
         require Parse::Hosts;
         my $res = Parse::Hosts::parse_hosts();
         last if $res->[0] != 200;
         for my $row (@{ $res->[2] }) {
             if ($inc_ip) {
-                $log->tracef("[comphost]   Adding: %s", $row->{ip});
+                $log->tracef("[comphost]   Adding: %s", $row->{ip}) if $COMPLETE_HOST_TRACE;
                 $hosts{$row->{ip}}++;
             }
             for (@{$row->{hosts}}) {
-                $log->tracef("[comphost]   Adding: %s", $_);
+                $log->tracef("[comphost]   Adding: %s", $_) if $COMPLETE_HOST_TRACE;
                 $hosts{$_}++;
             }
         }
@@ -98,7 +100,7 @@ sub complete_known_host {
   IFCONFIG:
     {
         last unless $inc_ip;
-        $log->tracef("[comphost] Checking ifconfig output");
+        $log->tracef("[comphost] Checking ifconfig output") if $COMPLETE_HOST_TRACE;
         require IPC::System::Options;
         for my $prog ("/sbin/ifconfig") {
             next unless -x $prog;
@@ -107,11 +109,11 @@ sub complete_known_host {
             next if $?;
             for my $line (@lines) {
                 if ($line =~ /^\s*inet addr:(\S+)/) {
-                    $log->tracef("[comphost]   Adding %s", $1);
+                    $log->tracef("[comphost]   Adding %s", $1) if $COMPLETE_HOST_TRACE;
                     $hosts{$1}++;
                 }
                 if ($line =~ m!^\s*inet6 addr:\s*(\S+?)(?:/\d+)?(?=\s)!) {
-                    $log->tracef("[comphost]   Adding %s", $1);
+                    $log->tracef("[comphost]   Adding %s", $1) if $COMPLETE_HOST_TRACE;
                     $hosts{$1}++;
                 }
             }
@@ -127,7 +129,7 @@ sub complete_known_host {
             if $ENV{HOME};
         for my $file (@files) {
             next unless -f $file;
-            $log->tracef("[comphost] Checking %s", $file);
+            $log->tracef("[comphost] Checking %s", $file) if $COMPLETE_HOST_TRACE;
             open my($fh), "<", $file or next;
             while (my $line = <$fh>) {
                 next unless $line =~ /\S/;
@@ -137,7 +139,7 @@ sub complete_known_host {
                 next if $h =~ /\A\|/; # hashed
                 my $is_ip = $h =~ $re_ipv6 || $h =~ $re_ipv4;
                 next if $is_ip && !$inc_ip;
-                $log->tracef("[comphost]   Adding %s", $h);
+                $log->tracef("[comphost]   Adding %s", $h) if $COMPLETE_HOST_TRACE;
                 $hosts{$h}++;
             }
         }
@@ -160,7 +162,9 @@ sub complete_known_host {
 
 =head2 COMPLETE_HOST_TRACE => bool
 
-Enable more
+If set to true, will display more log statements for debugging.
+
+
 =head1 SEE ALSO
 
 L<Complete>
