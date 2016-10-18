@@ -6,6 +6,7 @@ package Complete::Host;
 use 5.010001;
 use strict;
 use warnings;
+use Log::Any::IfLOG '$log';
 
 use Complete::Common qw(:all);
 
@@ -77,12 +78,44 @@ sub complete_known_host {
     # from /etc/hosts
     {
         last unless $args{include_hosts} // 1;
+        $log->tracef("[comphost] Checking /etc/hosts"];
         require Parse::Hosts;
         my $res = Parse::Hosts::parse_hosts();
         last if $res->[0] != 200;
         for my $row (@{ $res->[2] }) {
-            $hosts{$row->{ip}}++ if $inc_ip;
-            $hosts{$_}++ for @{$row->{hosts}};
+            if ($inc_ip) {
+                $log->tracef("[comphost]   Adding: %s", $row->{ip});
+                $hosts{$row->{ip}}++;
+            }
+            for (@{$row->{hosts}}) {
+                $log->tracef("[comphost]   Adding: %s", $_);
+                $hosts{$_}++;
+            }
+        }
+    }
+
+    # from ifconfig output
+  IFCONFIG:
+    {
+        last unless $inc_ip;
+        $log->tracef("[comphost] Checking ifconfig output"];
+        require IPC::System::Options;
+        for my $prog ("/sbin/ifconfig") {
+            next unless -x $prog;
+            my @lines = IPC::System::Options::readpipe(
+                {lang=>"C"}, "$prog -a");
+            next if $?;
+            for my $line (@lines) {
+                if ($line =~ /^\s*inet addr:(\S+)/) {
+                    $log->tracef("[comphost]   Adding %s", $1);
+                    $hosts{$1}++;
+                }
+                if ($line =~ m!^\s*inet6 addr:\s*(\S+?)(?:/\d+)?(?=\s)!) {
+                    $log->tracef("[comphost]   Adding %s", $1);
+                    $hosts{$1}++;
+                }
+            }
+            last IFCONFIG;
         }
     }
 
@@ -94,6 +127,7 @@ sub complete_known_host {
             if $ENV{HOME};
         for my $file (@files) {
             next unless -f $file;
+            $log->tracef("[comphost] Checking %s", $file];
             open my($fh), "<", $file or next;
             while (my $line = <$fh>) {
                 next unless $line =~ /\S/;
@@ -103,6 +137,7 @@ sub complete_known_host {
                 next if $h =~ /\A\|/; # hashed
                 my $is_ip = $h =~ $re_ipv6 || $h =~ $re_ipv4;
                 next if $is_ip && !$inc_ip;
+                $log->tracef("[comphost]   Adding %s", $h);
                 $hosts{$h}++;
             }
         }
@@ -121,6 +156,11 @@ sub complete_known_host {
 
 =for Pod::Coverage .+
 
+=head1 ENVIRONMENT
+
+=head2 COMPLETE_HOST_TRACE => bool
+
+Enable more
 =head1 SEE ALSO
 
 L<Complete>
