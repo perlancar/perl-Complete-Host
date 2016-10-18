@@ -1,5 +1,10 @@
 Revision history for Complete-Host
 
+0.03    2016-10-18 (PERLANCAR)
+
+	- [Bugfix] Fix Rinci metadata (didn't set result_naked=1).
+
+
 0.02    2016-10-18 (PERLANCAR)
 
         - First implementation of complete_known_host().
