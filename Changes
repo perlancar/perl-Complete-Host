@@ -1,11 +1,11 @@
-0.05    2017-07-03 (PERLANCAR)
+0.05    2017-07-03  Released-By: PERLANCAR
 
 	- No functional changes.
 
 	- Switch from Log::Any to Log::ger.
 
 
-0.04    2016-10-18 (PERLANCAR)
+0.04    2016-10-18  Released-By: PERLANCAR
 
 	- Add logging (enabled if COMPLETE_HOST_TRACE is set to true).
 
@@ -14,23 +14,23 @@
         - [Bugfix] Fix Rinci metadata (didn't set result_naked=1).
 
 
-0.03    2016-10-18 (PERLANCAR)
+0.03    2016-10-18  Released-By: PERLANCAR
 
 	- [Bugfix] Fix Rinci metadata (didn't set result_naked=1).
 
 
-0.02    2016-10-18 (PERLANCAR)
+0.02    2016-10-18  Released-By: PERLANCAR
 
         - First implementation of complete_known_host().
 
 
-0.01    2015-11-29 (PERLANCAR)
+0.01    2015-11-29  Released-By: PERLANCAR
 
         - No functional changes.
 
         - Adjust to Complete::Common 0.21.
 
 
-0.00    2015-09-16 (PERLANCAR)
+0.00    2015-09-16  Released-By: PERLANCAR
 
         - First release, not yet implemented.
